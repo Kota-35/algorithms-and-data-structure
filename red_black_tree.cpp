@@ -97,7 +97,83 @@ private:
         root->color = "BLACK";
     }
 
+    void transplant(Node* u, Node* v) {
+        if (u->p == NIL) {
+            root = v;
+        } else if (u == u->p->left) {
+            u->p->left = v;
+        } else {
+            u->p->right = v;
+        }
+        v->p = u->p;
+    }
+
+    Node* tree_minimum(Node* x) {
+        while (x->left != NIL) {
+            x = x->left;
+        }
+        return x;
+
+    }
+
+    void delete_fixup(Node* x) {
+        while (x != root && x->color == "BLACK") {
+            if (x == x->p->left) { // xは左の子?
+                Node* w = x->p->right; // wはの兄弟である
+                if (w->color == "RED") {
+                    w->color = "BLACk"; // ケース１
+                    x->p->color = "RED";
+                    left_rotate(x->p);
+                    w = x->p->right;
+                }
+                if (w->left->color == "BLACK" && w->right->color == "BLACK") {
+                    w->color = "RED"; // ケース２
+                    x = x->p;
+                } else {
+                    if (w->right->color == "BLACK") {
+                        w->left->color = "BLACK"; // ケース３
+                        w->color = "RED";
+                        right_rotate(w);
+                        w = x->p->right;
+                    }
+                    w->color = x->p->color; // ケース４
+                    x->p->color = "BLACK";
+                    w->right->color = "BLACK";
+                    left_rotate(x->p);
+                    x = root;
+                }
+            } else {
+                Node* w = x->p->left;
+                if (w->color == "RED") {
+                    w->color = "BLACK";
+                    x->p->color = "RED";
+                    right_rotate(x->p);
+                    w = x->p->left;
+                }
+                if (w->left->color == "BLACK" && w->right->color == "BLACK") {
+                    w->color = "RED";
+                    x = x->p;
+                } else {
+                    if (w->left->color == "BLACK") {
+                        w->right->color = "BLACK";
+                        w->color = "RED";
+                        left_rotate(w);
+                        w = x->p->left;
+                    }
+                    w->color = x->p->color;
+                    x->p->color = "BLACK";
+                    w->left->color = "BLACK";
+                    right_rotate(x->p);
+                    x = root;
+                }
+            }
+        }
+        x->color = "BLACK";
+    }
+
 public:
+    string y_original_color;
+
     RedBlackTree() {
         NIL = new Node(0);
         NIL->color = "BLACK";
@@ -134,10 +210,48 @@ public:
         insert_fixup(z);
     }
 
+    void deleteNode(Node* z) {
+        Node* y = z;
+        Node* x;
+        y_original_color = y->color;
+        if (z->left == NIL) {
+            x = z->right;
+            transplant(z, z->right); // zをその右の子で置き換える
+        } else if (z->right == NIL) {
+            x = z->left;
+            transplant(z, z->left); // zをその左の子で置き換える
+        } else {
+            Node* y = tree_minimum(z->right);
+            y_original_color = y->color; 
+            x = y->right;
+            if (y != z->right) {
+                transplant(z, z->left);
+                y->right = z->right;
+                y->right->p = y;
+            } else {
+                x->p = y;
+            }
+            transplant(z, y);
+            y->left = z->left;
+            y->left->p = y;
+            y->color = z->color;
+        }
+        if (y_original_color == "BLACK") { // ２色木の性質に違反しているか？
+            delete_fixup(x); // 違反を修正する
+        }
+    }
+
 };
 
 
 int main() {
-    cout << "Hello, World!" << endl;
+    RedBlackTree tree;
+    tree.insert(10);
+    tree.insert(20);
+    tree.insert(30);
+    tree.insert(15);
+    tree.insert(25);
+    tree.insert(5);
+    tree.insert(35);
     return 0;
 }
