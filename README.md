@@ -14,7 +14,7 @@
 
 ## コンパイル方法
 ```bash
-g++ -std=c++11 -o ./target/out red_black_tree.cpp
+g++ -std=c++11 -o ./target/out ./tree/red_black_tree.cpp
 ```
 
 ## 使用方法
