@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 using namespace std;
 
 struct Node {
@@ -19,8 +20,7 @@ struct Node {
 
 class RedBlackTree {
 private:
-    Node* root;
-    Node* NIL;
+
 
     void left_rotate(Node* x) {
         Node* y = x->right; // yはxの右の子
@@ -171,7 +171,32 @@ private:
         x->color = "BLACK";
     }
 
+    void print_tree_helper(Node* node, string indent, bool last) {
+        if (node != NIL) {
+            cout << indent;
+            if (last) {
+                cout << "└─";
+                indent += "  ";
+            } else {
+                cout << "├─";
+                indent += "│ ";
+            }
+
+            string color_name = node->color == "RED" ? "赤" : "黒";
+            cout << node->key << "(" << color_name << ")" << endl;
+
+            if (node->right == NIL) {
+                print_tree_helper(node->left, indent, true);  // 右の子がない場合、左の子は最後の子
+            } else {
+                print_tree_helper(node->left, indent, false);
+            }
+            print_tree_helper(node->right, indent, true);
+        }
+    }
+
 public:
+    Node* root;
+    Node* NIL;
     string y_original_color;
 
     RedBlackTree() {
@@ -190,7 +215,7 @@ public:
 
         while (x != NIL) { // 番兵に到達するまで繰り返す
             y = x; 
-            if (z->key < z->key) {
+            if (z->key < x->key) {  // xのキーと比較するように修正
                 x = x->left;
             } else {
                 x = x->right;
@@ -241,17 +266,36 @@ public:
         }
     }
 
+    void print_tree() {
+        if (root == NIL) {
+            cout << "木は空です" << endl;
+            return;
+        }
+        print_tree_helper(root, "", true);
+    }
+
+    void delete_by_key(int key) {
+        
+    }
+
 };
 
 
 int main() {
     RedBlackTree tree;
-    tree.insert(10);
-    tree.insert(20);
-    tree.insert(30);
-    tree.insert(15);
-    tree.insert(25);
-    tree.insert(5);
-    tree.insert(35);
+
+    vector<int> keys = {8, 6, 5, 1, 3};
+    for (int key : keys) {
+        tree.insert(key);
+    }
+    
+    cout << "赤黒木の構造:" << endl;
+    tree.print_tree();
+
+    tree.deleteNode(tree.root->left);
+
+    cout << "削除後の赤黒木の構造:" << endl;
+    tree.print_tree();
+    
     return 0;
 }
